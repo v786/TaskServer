@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Task Servers</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container">
+                <h1>Task Servers</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4 m-2">
+                <button type="button" class="btn btn-primary" onclick="createServer()">Add Server</button>
+            </div>
+            <div class="col-sm-4 m-2">
+                <button type="button" class="btn btn-danger" onclick="deleteServer()">Delete Server</button>
+            </div>
+            <div class="col-sm-4 m-2">
+                <button type="button" class="btn btn-primary" onclick="createTask()">Add Task</button>
+            </div>
+            <div class="col-sm-4 m-2">
+                <button type="button" class="btn btn-danger" onclick="deleteTask()">Delete Task</button>
+            </div>
+        </div>
+
+        <div>
+            <h1>Servers : </h1>
+            <div id="serverList"></div>
+
+        </div>
+
+        <div>
+            <h1>Tasks : </h1>
+            <div id="taskList"></div>
+        </div>
+    </div>
+
+
+
+
+    <script>
+        var loop = setInterval(function () { showServers(); showTasks(); assignTask() }, 50)
+        var taskTime = 20;
+
+        function assignTask() {
+
+            for (i = 0; i < serverList.length; i++) {
+                if (serverList[i].task == "") {
+                    if (taskList.length == 0)
+                        continue;
+                    var task = taskList.pop();
+                    var e = new Date();
+                    e.setSeconds(e.getSeconds() + taskTime)
+                    serverList[i].task = task.nameTask;
+                    serverList[i].endTime = e;
+                    serverList[i].timeLeft = (e.getTime() - (new Date).getTime()) / 1000
+                }
+                else {
+                    serverList[i].timeLeft = (serverList[i].endTime - (new Date).getTime()) / 1000
+                    if (serverList[i].timeLeft <= 0) {
+                        serverList[i].task = ""
+                        serverList[i].endTime = -1
+                        serverList[i].timeLeft = -1
+                    }
+                }
+            }
+
+        }
+
+        var serverList = [];
+        var taskList = [];
+        function createServer() {
+            var server = {
+                name: Math.random().toString(36).substring(10),
+                endTime: -1,
+                timeLeft: -1,
+                task: ""
+            }
+            serverList.push(server)
+        }
+
+        function createTask() {
+            var task = {
+                nameTask: Math.random().toString(36).substring(7)
+            }
+            taskList.push(task)
+        }
+        
+        function deleteServer() {
+            for (i = 0; i < serverList.length; i++) {
+                if (serverList[i].task == "") {
+                    serverList.pop(i)
+                    return;
+                }
+            }
+        }
+
+        function deleteTask() {
+            taskList.pop();
+        }
+
+        function showServers() {
+            sLen = serverList.length;
+
+            text = '<div class="container" >';
+            for (i = 0; i < sLen; i++) {
+                if (serverList[i].task != "") {
+                    text += '<div class="card m-1">';
+                    text += '<div class="card-body">'
+                    text += '<div> <span class="badge badge-info">' + serverList[i].name + '</span>' + " running task "
+                        + '<span class="badge badge-info">' + serverList[i].task + '</span>' + "</div>";
+                    var pc = ((taskTime - serverList[i].timeLeft) / taskTime) * 100
+                    text += '<div class="progress">';
+                    text += '<div id="id_task_loader" class="progress-bar progress-bar-striped" style="width:' + pc + '%">' + pc + '</div>';
+                    text += '</div>';
+                    text += "</div>";
+                    text += "</div>";
+                }
+                else {
+                    text += '<div class="card m-1">';
+                    text += '<div class="card-body">' + '<span class="badge badge-info">' + serverList[i].name + '</span>' + " is Idle </div>";
+                    text += "</div>";
+                }
+            }
+            text += "</div>";
+            document.getElementById("serverList").innerHTML = text
+        }
+
+        function showTasks() {
+            tLen = taskList.length;
+
+            text = "<div>";
+            for (i = 0; i < tLen; i++) {
+                text += "<div>" + taskList[i].nameTask + "</div>";
+            }
+            text += "</div>";
+            document.getElementById("taskList").innerHTML = text
+        }
+        
+    </script>
+</body>
+
+</html>
